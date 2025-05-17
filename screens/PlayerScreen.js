@@ -1,12 +1,101 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView } from "react-native"
 import { Feather } from "@expo/vector-icons"
+import { Audio } from 'expo-av';
 
-const PlayerScreen = ({ navigation }) => {
-  const [isPlaying, setIsPlaying] = useState(true)
-  const [progress, setProgress] = useState(0.033) // 1:30 of 45:00
+const sessionData = {
+  1: {
+    title: "Focus Attention",
+    subtitle: "7 DAYS OF CALM",
+    audio: require("../assets/audio/focus-attention.mp3"),
+  },
+  2: {
+    title: "Body Scan",
+    subtitle: "5 MIN BODY SCAN",
+    audio: require("../assets/audio/body-scan.mp3"),
+  },
+  3: {
+    title: "Making Happiness",
+    subtitle: "3 MIN HAPPINESS",
+    audio: require("../assets/audio/making-happiness.mp3"),
+  },
+};
+
+const PlayerScreen = ({ navigation, route }) => {
+  const sessionId = route?.params?.sessionId || 1;
+  const { title, subtitle, audio } = sessionData[sessionId] || sessionData[1];
+
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [progress, setProgress] = useState(0)
+  const [duration, setDuration] = useState(0)
+  const [position, setPosition] = useState(0)
+  const [isFavorite, setIsFavorite] = useState(false)
+  const soundRef = useRef(null)
+  const SEEK_STEP = 10000; // 10 giây
+
+  useEffect(() => {
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.unloadAsync()
+      }
+    }
+  }, [])
+
+  const onPlaybackStatusUpdate = status => {
+    if (status.isLoaded) {
+      setDuration(status.durationMillis || 0)
+      setPosition(status.positionMillis || 0)
+      setProgress((status.positionMillis || 0) / (status.durationMillis || 1))
+      if (status.didJustFinish) {
+        setIsPlaying(false)
+        setProgress(0)
+      }
+    }
+  }
+
+  const playAudio = async () => {
+    if (soundRef.current) {
+      await soundRef.current.playAsync()
+      setIsPlaying(true)
+      return
+    }
+    const { sound } = await Audio.Sound.createAsync(
+      audio,
+      { shouldPlay: true },
+      onPlaybackStatusUpdate
+    )
+    soundRef.current = sound
+    setIsPlaying(true)
+  }
+
+  const pauseAudio = async () => {
+    if (soundRef.current) {
+      await soundRef.current.pauseAsync()
+      setIsPlaying(false)
+    }
+  }
+
+  const seekBackward = async () => {
+    if (soundRef.current) {
+      const status = await soundRef.current.getStatusAsync();
+      if (status.isLoaded) {
+        let newPosition = Math.max(0, status.positionMillis - SEEK_STEP);
+        await soundRef.current.setPositionAsync(newPosition);
+      }
+    }
+  };
+
+  const seekForward = async () => {
+    if (soundRef.current) {
+      const status = await soundRef.current.getStatusAsync();
+      if (status.isLoaded) {
+        let newPosition = Math.min(status.durationMillis, status.positionMillis + SEEK_STEP);
+        await soundRef.current.setPositionAsync(newPosition);
+      }
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -16,8 +105,8 @@ const PlayerScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <View style={styles.actionButtons}>
-          <TouchableOpacity style={styles.actionButton}>
-            <Feather name="heart" size={24} color="#A0A3B1" />
+          <TouchableOpacity style={styles.actionButton} onPress={() => setIsFavorite(!isFavorite)}>
+            <Feather name="heart" size={24} color={isFavorite ? "#FA6E5A" : "#A0A3B1"} />
           </TouchableOpacity>
           <TouchableOpacity style={styles.actionButton}>
             <Feather name="download" size={24} color="#A0A3B1" />
@@ -25,15 +114,15 @@ const PlayerScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.content}>
-          <Text style={styles.title}>Focus Attention</Text>
-          <Text style={styles.subtitle}>7 DAYS OF CALM</Text>
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.subtitle}>{subtitle}</Text>
 
           <View style={styles.controlsContainer}>
-            <TouchableOpacity style={styles.controlButton}>
+            <TouchableOpacity style={styles.controlButton} onPress={seekBackward}>
               <Feather name="rotate-ccw" size={24} color="#3F414E" />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.playPauseButton} onPress={() => setIsPlaying(!isPlaying)}>
+            <TouchableOpacity style={styles.playPauseButton} onPress={isPlaying ? pauseAudio : playAudio}>
               {isPlaying ? (
                 <Feather name="pause" size={30} color="white" />
               ) : (
@@ -41,25 +130,32 @@ const PlayerScreen = ({ navigation }) => {
               )}
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.controlButton}>
+            <TouchableOpacity style={styles.controlButton} onPress={seekForward}>
               <Feather name="rotate-cw" size={24} color="#3F414E" />
             </TouchableOpacity>
           </View>
 
           <View style={styles.progressContainer}>
-            {/* Custom progress bar instead of Slider */}
             <View style={styles.progressBarContainer}>
               <View style={[styles.progressBar, { width: `${progress * 100}%` }]} />
             </View>
             <View style={styles.timeContainer}>
-              <Text style={styles.timeText}>01:30</Text>
-              <Text style={styles.timeText}>45:00</Text>
+              <Text style={styles.timeText}>{formatMillis(position)}</Text>
+              <Text style={styles.timeText}>{formatMillis(duration)}</Text>
             </View>
           </View>
         </View>
       </View>
     </SafeAreaView>
   )
+}
+
+function formatMillis(ms) {
+  if (!ms) return "00:00"
+  const totalSec = Math.floor(ms / 1000)
+  const min = Math.floor(totalSec / 60)
+  const sec = totalSec % 60
+  return `${min.toString().padStart(2, "0")}:${sec.toString().padStart(2, "0")}`
 }
 
 const styles = StyleSheet.create({
@@ -70,17 +166,17 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: "#FAF8F5",
-    borderRadius: 20,
-    margin: 10,
     padding: 20,
   },
   closeButton: {
-    alignSelf: "flex-start",
+    position: "absolute",
+    top: 40,
+    left: 20,
   },
   actionButtons: {
     flexDirection: "row",
     position: "absolute",
-    top: 20,
+    top: 40,
     right: 20,
   },
   actionButton: {

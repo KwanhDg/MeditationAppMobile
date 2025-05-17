@@ -13,6 +13,7 @@ import RemindersScreen from "./screens/RemindersScreen";
 import CourseDetailScreen from "./screens/CourseDetailScreen";
 import PlayerScreen from "./screens/PlayerScreen";
 import BottomTabNavigator from "./navigation/BottomTabNavigator";
+import SleepStories from "./screens/SleepStories";
 
 const Stack = createNativeStackNavigator();
 
@@ -35,10 +36,11 @@ export default function App() {
           <Stack.Screen name="Reminders" component={RemindersScreen} />
           
           {/* ⬇️ Replace HomeScreen with the BottomTabNavigator */}
-          <Stack.Screen name="Home" component={BottomTabNavigator} />
+          <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
           
           <Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
           <Stack.Screen name="Player" component={PlayerScreen} />
+          <Stack.Screen name="SleepStories" component={SleepStories} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

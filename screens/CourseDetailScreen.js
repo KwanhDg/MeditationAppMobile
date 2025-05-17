@@ -1,5 +1,66 @@
 import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, Image } from "react-native"
 import { Feather } from "@expo/vector-icons"
+import React, { useState } from "react"
+
+const defaultCourse = {
+  title: "Happy Morning",
+  description: "Ease the mind into a restful night's sleep with these deep, ambient tones.",
+  image: require("../assets/images/happy-morning-banner.png"),
+  sessions: [
+    { id: 1, title: "Focus Attention", duration: "10 MIN" },
+    { id: 2, title: "Body Scan", duration: "5 MIN" },
+    { id: 3, title: "Making Happiness", duration: "3 MIN" },
+  ],
+};
+
+const courseData = {
+  0: {
+    title: "Daily Calm",
+    description: "A daily meditation to help you pause and reset.",
+    image: require("../assets/images/7-days-of-calm.png"),
+    sessions: [
+      { id: 1, title: "Pause Practice", duration: "10 MIN" },
+      { id: 2, title: "Mindful Start", duration: "8 MIN" },
+    ],
+  },
+  1: {
+    title: "7 Days of Calm",
+    description: "A week-long journey to inner peace and calm.",
+    image: require("../assets/images/7-days-of-calm.png"),
+    sessions: [
+      { id: 1, title: "Focus Attention", duration: "10 MIN" },
+      { id: 2, title: "Body Scan", duration: "5 MIN" },
+      { id: 3, title: "Making Happiness", duration: "3 MIN" },
+    ],
+  },
+  2: {
+    title: "Anxiety Release",
+    description: "Meditations to help you release anxiety and find calm.",
+    image: require("../assets/images/anxiety-release.png"),
+    sessions: [
+      { id: 1, title: "Letting Go", duration: "8 MIN" },
+      { id: 2, title: "Breath Awareness", duration: "6 MIN" },
+    ],
+  },
+  3: {
+    title: "Emergency Calm",
+    description: "Quick practices for moments of stress.",
+    image: require("../assets/images/emergency-calm.png"),
+    sessions: [
+      { id: 1, title: "Quick Calm", duration: "5 MIN" },
+      { id: 2, title: "Reset Mind", duration: "7 MIN" },
+    ],
+  },
+  4: {
+    title: "Breathe & Focus",
+    description: "Breathing exercises to improve focus and clarity.",
+    image: require("../assets/images/breathe-focus.png"),
+    sessions: [
+      { id: 1, title: "Deep Breathing", duration: "6 MIN" },
+      { id: 2, title: "Focus Practice", duration: "9 MIN" },
+    ],
+  },
+};
 
 const SessionItem = ({ title, duration, onPress }) => {
   return (
@@ -15,18 +76,27 @@ const SessionItem = ({ title, duration, onPress }) => {
   )
 }
 
-const CourseDetailScreen = ({ navigation }) => {
+const CourseDetailScreen = ({ navigation, route }) => {
+  const { courseId } = route.params || {};
+  const course = courseData[courseId] || defaultCourse;
+
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  const handlePlay = (sessionId) => {
+    navigation.navigate('Player', { sessionId });
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.card}>
-        <Image source={require("../assets/images/happy-morning-banner.png")} style={styles.banner} />
+        <Image source={course.image} style={styles.banner} />
 
         <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
           <Feather name="arrow-left" size={24} color="black" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.favoriteButton}>
-          <Feather name="heart" size={24} color="black" />
+        <TouchableOpacity style={styles.favoriteButton} onPress={() => setIsFavorite(!isFavorite)}>
+          <Feather name="heart" size={24} color={isFavorite ? "#FA6E5A" : "black"} />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.downloadButton}>
@@ -34,12 +104,10 @@ const CourseDetailScreen = ({ navigation }) => {
         </TouchableOpacity>
 
         <ScrollView style={styles.content}>
-          <Text style={styles.title}>Happy Morning</Text>
+          <Text style={styles.title}>{course.title}</Text>
           <Text style={styles.courseLabel}>COURSE</Text>
 
-          <Text style={styles.description}>
-            Ease the mind into a restful night's sleep with these deep, ambient tones.
-          </Text>
+          <Text style={styles.description}>{course.description}</Text>
 
           <View style={styles.statsContainer}>
             <View style={styles.statItem}>
@@ -52,7 +120,7 @@ const CourseDetailScreen = ({ navigation }) => {
             </View>
           </View>
 
-          <Text style={styles.sectionTitle}>Pick a Nrrrrator</Text>
+          <Text style={styles.sectionTitle}>Pick a Session</Text>
 
           <View style={styles.narratorContainer}>
             <TouchableOpacity style={[styles.narratorButton, styles.activeNarratorButton]}>
@@ -63,11 +131,14 @@ const CourseDetailScreen = ({ navigation }) => {
             </TouchableOpacity>
           </View>
 
-          <SessionItem title="Focus Attention" duration="10 MIN" onPress={() => navigation.navigate("Player")} />
-
-          <SessionItem title="Body Scan" duration="5 MIN" onPress={() => navigation.navigate("Player")} />
-
-          <SessionItem title="Making Happiness" duration="3 MIN" onPress={() => navigation.navigate("Player")} />
+          {course.sessions.map((session) => (
+            <SessionItem
+              key={session.id}
+              title={session.title}
+              duration={session.duration}
+              onPress={() => handlePlay(session.id)}
+            />
+          ))}
         </ScrollView>
       </View>
     </SafeAreaView>
@@ -82,8 +153,6 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: "white",
-    borderRadius: 20,
-    margin: 10,
     overflow: "hidden",
   },
   banner: {
@@ -92,7 +161,7 @@ const styles = StyleSheet.create({
   },
   backButton: {
     position: "absolute",
-    top: 20,
+    top: 40,
     left: 20,
     width: 40,
     height: 40,
@@ -103,7 +172,7 @@ const styles = StyleSheet.create({
   },
   favoriteButton: {
     position: "absolute",
-    top: 20,
+    top: 40,
     right: 70,
     width: 40,
     height: 40,
@@ -114,7 +183,7 @@ const styles = StyleSheet.create({
   },
   downloadButton: {
     position: "absolute",
-    top: 20,
+    top: 40,
     right: 20,
     width: 40,
     height: 40,

@@ -2,7 +2,7 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 
 import HomeScreen from "../screens/HomeScreen";
-import SleepScreen from "../screens/SleepScreen";
+import SleepStack from "../navigation/SleepStack";
 import MeditateScreen from "../screens/MeditateScreen";
 import MusicScreen from "../screens/MusicScreen";
 import ProfileScreen from "../screens/ProfileScreen";
@@ -42,7 +42,7 @@ export default function BottomTabNavigator() {
               return <MeditateIcon width={size} height={size} fill={color} />;
             case "Music":
               return <MusicIcon width={size} height={size} fill={color} />;
-            case "Afsar":
+            case "User":
               return <ProfileIcon width={size} height={size} fill={color} />;
             default:
               return null;
@@ -51,10 +51,18 @@ export default function BottomTabNavigator() {
       })}
     >
       <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Sleep" component={SleepScreen} />
+      <Tab.Screen name="Sleep" component={SleepStack} options={{
+        tabBarStyle: {
+          backgroundColor: "#151932",
+          borderTopWidth: 0,
+          height: 70,
+          paddingBottom: 10,
+          paddingTop: 10,
+        }
+      }} />
       <Tab.Screen name="Meditate" component={MeditateScreen} />
       <Tab.Screen name="Music" component={MusicScreen} />
-      <Tab.Screen name="Afsar" component={ProfileScreen} />
+      <Tab.Screen name="User" component={ProfileScreen} />
     </Tab.Navigator>
   );
 }

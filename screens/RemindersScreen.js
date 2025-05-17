@@ -141,12 +141,12 @@ const RemindersScreen = ({ navigation }) => {
 
         <TouchableOpacity
           style={styles.saveButton}
-          onPress={() => navigation.navigate("Home")}
+          onPress={() => navigation.navigate("MainTabs")}
         >
           <Text style={styles.saveButtonText}>SAVE</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => navigation.navigate("Home")}>
+        <TouchableOpacity onPress={() => navigation.navigate("MainTabs")}>
           <Text style={styles.noThanksText}>NO THANKS</Text>
         </TouchableOpacity>
       </ScrollView>

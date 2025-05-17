@@ -22,6 +22,37 @@ const MeditationCard = ({ title, subtitle, duration, image, onPress }) => {
   )
 }
 
+const meditationCourses = [
+  {
+    courseId: 1,
+    title: "7 Days of Calm",
+    subtitle: "MEDITATION",
+    duration: "3-10 MIN",
+    image: require("../assets/images/7-days-of-calm.png"),
+  },
+  {
+    courseId: 2,
+    title: "Anxiety Release",
+    subtitle: "MEDITATION",
+    duration: "3-10 MIN",
+    image: require("../assets/images/anxiety-release.png"),
+  },
+  {
+    courseId: 3,
+    title: "Emergency Calm",
+    subtitle: "PRACTICE",
+    duration: "3-10 MIN",
+    image: require("../assets/images/emergency-calm.png"),
+  },
+  {
+    courseId: 4,
+    title: "Breathe & Focus",
+    subtitle: "MEDITATION",
+    duration: "3-10 MIN",
+    image: require("../assets/images/breathe-focus.png"),
+  },
+];
+
 const MeditateScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
@@ -40,7 +71,7 @@ const MeditateScreen = ({ navigation }) => {
         </ScrollView>
 
         <ScrollView showsVerticalScrollIndicator={false}>
-          <TouchableOpacity style={styles.dailyCalmCard} onPress={() => navigation.navigate("CourseDetail")}>
+          <TouchableOpacity style={styles.dailyCalmCard} onPress={() => navigation.navigate("CourseDetail", { courseId: 0, title: "Daily Calm" })}>
             <View style={styles.dailyCalmContent}>
               <Text style={styles.dailyCalmTitle}>Daily Calm</Text>
               <Text style={styles.dailyCalmSubtitle}>APR 30 • PAUSE PRACTICE</Text>
@@ -51,66 +82,18 @@ const MeditateScreen = ({ navigation }) => {
           </TouchableOpacity>
 
           <View style={styles.meditationsGrid}>
-            <MeditationCard
-              title="7 Days of Calm"
-              subtitle="MEDITATION"
-              duration="3-10 MIN"
-              image={require("../assets/images/7-days-of-calm.png")}
-              onPress={() => navigation.navigate("CourseDetail")}
-            />
-
-            <MeditationCard
-              title="Anxiet Release"
-              subtitle="MEDITATION"
-              duration="3-10 MIN"
-              image={require("../assets/images/anxiety-release.png")}
-              onPress={() => navigation.navigate("CourseDetail")}
-            />
-
-            <MeditationCard
-              title="Emergency Calm"
-              subtitle="PRACTICE"
-              duration="3-10 MIN"
-              image={require("../assets/images/emergency-calm.png")}
-              onPress={() => navigation.navigate("CourseDetail")}
-            />
-
-            <MeditationCard
-              title="Breathe & Focus"
-              subtitle="MEDITATION"
-              duration="3-10 MIN"
-              image={require("../assets/images/breathe-focus.png")}
-              onPress={() => navigation.navigate("CourseDetail")}
-            />
+            {meditationCourses.map((course) => (
+              <MeditationCard
+                key={course.courseId}
+                title={course.title}
+                subtitle={course.subtitle}
+                duration={course.duration}
+                image={course.image}
+                onPress={() => navigation.navigate("CourseDetail", { courseId: course.courseId, title: course.title })}
+              />
+            ))}
           </View>
         </ScrollView>
-
-        <View style={styles.tabBar}>
-          <TouchableOpacity style={styles.tabItem} onPress={() => navigation.navigate("Home")}>
-            <Feather name="home" size={24} color="#A0A3B1" />
-            <Text style={styles.tabLabel}>Home</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.tabItem}>
-            <Feather name="moon" size={24} color="#A0A3B1" />
-            <Text style={styles.tabLabel}>Sleep</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.tabItem}>
-            <Feather name="headphones" size={24} color="#8E97FD" />
-            <Text style={[styles.tabLabel, styles.activeTabLabel]}>Meditate</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.tabItem}>
-            <Feather name="music" size={24} color="#A0A3B1" />
-            <Text style={styles.tabLabel}>Music</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.tabItem}>
-            <Feather name="user" size={24} color="#A0A3B1" />
-            <Text style={styles.tabLabel}>Afsar</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </SafeAreaView>
   )
@@ -124,8 +107,6 @@ const styles = StyleSheet.create({
   card: {
     flex: 1,
     backgroundColor: "white",
-    borderRadius: 20,
-    margin: 10,
     padding: 20,
   },
   title: {
@@ -220,24 +201,6 @@ const styles = StyleSheet.create({
   meditationDetails: {
     fontSize: 11,
     color: "#A1A4B2",
-  },
-  tabBar: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    borderTopWidth: 1,
-    borderTopColor: "#F2F2F2",
-    paddingTop: 15,
-  },
-  tabItem: {
-    alignItems: "center",
-  },
-  tabLabel: {
-    fontSize: 12,
-    color: "#A0A3B1",
-    marginTop: 5,
-  },
-  activeTabLabel: {
-    color: "#8E97FD",
   },
 })
 
